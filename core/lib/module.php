@@ -146,14 +146,12 @@ function select_module_versions($modules)
 function load_manifests()
 {
   global $modules, $manifests, $loaded_modules, $manifest;
-  
   $modules = select_module_versions($modules);
   $module_folders = validate_module_folder_structure($modules);
 
   $manifests = array();
   $loaded_modules = array();
   $requires = array();
-  
   foreach($module_folders as $module_name=>$this_module_fpath)
   {
     if (array_key_exists($module_name, $manifests)) continue;
@@ -171,10 +169,6 @@ function load_manifests()
     {
       if (!array_key_exists($dep, $manifest)) $manifest[$dep] = array();
       if (!is_array($manifest[$dep])) $manifest[$dep] = array($manifest[$dep] );
-    }
-    foreach($manifest['requires'] as $dep_module_name)
-    {
-      if (!array_key_exists($dep_module_name, $module_folders)) click_error("$module_name mentions $dep_module_name, but it's not found. Did you spell it right?");
     }
     $manifest['loaded']=false;
     if (!array_key_exists('priority_load', $manifest)) $manifest['priority_load'] = false;
@@ -205,6 +199,7 @@ function load_manifests()
       if (!$manifest['enabled']) continue;
       foreach($manifest['requires'] as $required_module_name)
       {
+        if (!isset($manifests[$required_module_name])) click_error("$module_name mentions $required_module_name, but it's not found. Did you spell it right?");
         $start_over |= !$manifests[$required_module_name]['enabled'];
         $manifests[$required_module_name]['enabled'] = true;
       }
@@ -239,7 +234,7 @@ function load_manifests()
       }
     }
   }
-
+  
   // precalc load order
   foreach($manifests as $manifest_name=>$manifest)
   {

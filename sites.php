@@ -7,10 +7,10 @@ $__click['sites'] = array (
     'run_mode' => 'development',
     'database' => 
     array (
-      'host' => '',
-      'username' => '',
-      'password' => '',
-      'catalog' => '',
+        'host' => '',
+        'username' => '',
+        'password' => '',
+        'catalog' => '',
     ),
     'http_auth' => 
     array (
@@ -18,5 +18,21 @@ $__click['sites'] = array (
       'password' => 'admin',
     ),
   ),
+  'avsms' => 
+  array (
+    'path' => 'avsms',
+    'run_mode' => 'development',
+    'database' => array(
+        'host' => '172.19.1.56',
+        'username' => 'root',
+        'password' => 'r00t',
+        'catalog' => 'avsms',
+    ),
+    'http_auth' => 
+    array (
+      'username' => '',
+      'password' => '',
+    ),
+  ),  
 )
 ;

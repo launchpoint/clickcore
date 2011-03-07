@@ -1,6 +1,7 @@
 <?
 
-$start = microtime(true);
+$__click=array();
+$__click['start'] = microtime(true);
 
 $fname = dirname(__FILE__)."/../config.php";
 require($fname);
@@ -12,7 +13,6 @@ foreach(glob(dirname(__FILE__)."/lib/*.php") as $lib)
 
 define('CLI',isset($_ENV['SSH_CLIENT']));
 
-$__click = array();
 add_global('__click');
 
 
@@ -126,5 +126,5 @@ try
 } catch(RedirectException $r)
 {
 }
-$end = microtime(true);
+$__click['end'] = microtime(true);
 

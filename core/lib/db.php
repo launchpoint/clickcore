@@ -2,7 +2,6 @@
 
 
 
-$queries = array();
 
 function db_connect($database_settings)
 {
@@ -20,7 +19,7 @@ function db_connect($database_settings)
 
 function query($sql)
 {
-	global $queries, $dbh;
+	global $__click;
 	$args = func_get_args();
 	array_shift($args);
   $s = '';
@@ -78,19 +77,19 @@ function query($sql)
 	$sql = $s;
 	
 	$sql = trim($sql);
-	$queries[]=$sql;
+	$__click['queries'][]=$sql;
 	if ( preg_match('/^delete|^update/mi',$sql)>0 && preg_match('/\s+where\s+/mi', $sql)==0)
 	{
 		click_error("DELETE or UPDATE error. No WHERE specified", $sql);
 	}
 	$start = microtime(true);
-	$res = mysql_query($sql, $dbh);
+	$res = mysql_query($sql, $__click['dbh']);
 	$end = microtime(true);
-	$queries[] = (int)(($end-$start)*1000);
+	$__click['queries'][] = (int)(($end-$start)*1000);
 	if ($res===FALSE) {
-		click_error(mysql_error($dbh), $sql);
+		click_error(mysql_error($__click['dbh']), $sql);
 	}
-	if (gettype($res)=='resource') $queries[] = mysql_num_rows($res); else $queries[] = 0;
+	if (gettype($res)=='resource') $__click['queries'][] = mysql_num_rows($res); else $__click['queries'][] = 0;
 	return $res;
 }
 
@@ -108,9 +107,9 @@ function query_assoc($sql)
 
 function query_file($fpath)
 {
-  global $database_settings;
+  global $__click;
   
-  $cmd = "mysql -u {$database_settings['username']} --password={$database_settings['password']} -D {$database_settings['catalog']} < \"$fpath\"";
+  $cmd = "mysql -u {$__click['build']['database']['username']} --password={$__click['build']['database']['password']} -h {$__click['build']['database']['host']} -D {$__click['build']['database']['catalog']} < \"$fpath\"";
   click_exec($cmd);
 }
 
@@ -128,12 +127,12 @@ function db_table_exists($name)
 
 function db_dump($fname='db.gz', $include_data = true)
 {
-  global $database_settings;
+  global $__click;
   if(!startswith($fname, '/')) $fname = BUILD_FPATH ."/{$fname}";
   ensure_writable_folder(dirname($fname));
   $extra = '';
   if(!$include_data) $extra .= ' --no-data ';
-  $cmd = "mysqldump {$extra} --compact -u {$database_settings['username']} --password={$database_settings['password']} {$database_settings['catalog']} | gzip > {$fname}";
+  $cmd = "mysqldump {$extra} --compact -u {$__click['build']['database']['username']} --password={$__click['build']['database']['password']}  -h {$__click['build']['database']['host']}  {$__click['build']['database']['catalog']} | gzip > {$fname}";
   click_exec($cmd);
 }
 
