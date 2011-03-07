@@ -1,8 +1,8 @@
 <VirtualHost *:80>
   ServerAlias *
-  DocumentRoot /home/lsi/app2
+  DocumentRoot #path#
 
-  ErrorLog /home/lsi/app2/logs/error.log
+  ErrorLog #path#/logs/error.log
   LogFormat "%h %l %u %t \"%r\" %>s %b" common
-  CustomLog /home/lsi/app2/logs/access.log common
+  CustomLog #path#/logs/access.log common
 </VirtualHost>
