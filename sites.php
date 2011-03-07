@@ -3,7 +3,7 @@
 $__click['sites'] = array (
   '*' => 
   array (
-    'path' => 'admin',
+    'path' => 'rootkit',
     'run_mode' => 'development',
     'database' => 
     array (
