@@ -3,3 +3,4 @@ vhost.conf
 cache/*
 tmp/*
 modules/*
+apps/*
