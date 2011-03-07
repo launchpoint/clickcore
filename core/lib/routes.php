@@ -16,7 +16,7 @@ function build_url($path, $arg_count, $args, $is_ssl_required=false)
   $qs = array();
   if (count($args)>0 && is_array($args[count($args)-1])) $qs = array_pop($args);
   if (count($args) > $arg_count) click_error("Wrong number of arguments", array($path, $arg_count, $args));
-  $parts = split('\?', $path);
+  $parts = explode('?', $path);
   $extra_args = array();
   if(count($parts)>1)
   {
@@ -87,7 +87,7 @@ $__routes = array();
 function map($event_name, $path, $routed_event_name = null, $url_generator_name=null, $is_ssl_required = false)
 {
   global $code, $__click, $__routes;
-  $parts = split("\\/", $path);
+  $parts = explode("/", $path);
   $keys=array();
   foreach($parts as &$part)
   {
@@ -168,7 +168,7 @@ function route_matches()
 function route_to_regex($path)
 {
   global $code, $__click;
-  $parts = split("\\/", $path);
+  $parts = explode("/", $path);
   $keys=array();
   foreach($parts as &$part)
   {

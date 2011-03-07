@@ -16,7 +16,8 @@ $__click = array();
 add_global('__click');
 
 
-$__click['sites'] = $__sites;
+$fname = dirname(__FILE__)."/../sites.php";
+require($fname);
 $__click['build'] = find_build();
 
 if(!CLI)
@@ -33,6 +34,7 @@ if(!CLI)
   }
 }
 
+if(isset($__click['build']['database']['host']) && $__click['build']['database']['host']=='') $__click['build']['database']=array();
 if($__click['build']['database'])
 {
   $__click['dbh'] = db_connect($__click['build']['database']);
@@ -69,15 +71,15 @@ if(!isset($_SESSION['__core']['sessions'])) $_SESSION['__core']['sessions'] = ar
 if(!isset($_SESSION['__core']['sessions'][$_SESSION['__core']['current_session_id']])) $_SESSION['__core']['sessions'][$_SESSION['__core']['current_session_id']] = array();
 if(isset($_GET['__session_id'])) $_SESSION['__core']['current_session_id'] = $_GET['__session_id'];
 if(!isset($_SESSION['__core']['sessions'][$_SESSION['__core']['current_session_id']])) $_SESSION['__core']['sessions'][$_SESSION['__core']['current_session_id']] = array();
-$__core['session'] = $_SESSION['__core']['sessions'][$_SESSION['__core']['current_session_id']];
-if(!isset($__core['session']['run_mode'])) $__core['session']['run_mode'] = $__click['run_mode'];
+$__click['session'] = $_SESSION['__core']['sessions'][$_SESSION['__core']['current_session_id']];
+if(!isset($__click['session']['run_mode'])) $__click['session']['run_mode'] = $__click['run_mode'];
 
 if(isset($_GET['__run_mode']))
 {
-  $__core['session']['run_mode'] = $_GET['__run_mode'];
+  $__click['session']['run_mode'] = $_GET['__run_mode'];
 }
 
-$__click['run_mode'] = $__core['session']['run_mode'];
+$__click['run_mode'] = $__click['session']['run_mode'];
 
 $f = BUILD_FPATH."/modules.php";
 if(file_exists($f)) require($f);
@@ -115,12 +117,6 @@ if (q('__restart') || in($__click['run_mode'],RUN_MODE_DEVELOPMENT,RUN_MODE_TEST
   $do_codegen=false;
   require(KERNEL_CACHE_FPATH."/stub.php");
 }
-
-dprint($__click,false);
-dprint(round( (microtime(true)-$start) * 1000, 0));
-
-
-
 
 try
 {

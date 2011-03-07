@@ -77,7 +77,6 @@ function lock($lock_name, $should_block=true)
 function unlock($lock_name)
 {
   global $__click;
-  dprint($__click['locks'],false);
   $lock_key = md5(ROOT_FPATH)."_{$lock_name}";
   if($__click['build']['database'])
   {
