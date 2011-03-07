@@ -1,0 +1,46 @@
+%h1 The following builds are available
+=button_to('Add', add_build_url())
+%table
+  %tr
+    %th Domain Pattern
+    %th File Path
+    %th Run Mode
+    %th Database
+    %th HTTP Auth
+  -foreach($__click['sites'] as $pat=>$info)
+    %tr
+      %td +$pat
+      %td +$info['path']
+      %td +humanize($info['run_mode'])
+      %td
+        -if($info['database'])
+          %table
+            %tr
+              %th Host
+              %td +$info['database']['host']
+            %tr
+              %th Username
+              %td +$info['database']['username']
+            %tr
+              %th Password
+              %td +$info['database']['password']
+            %tr
+              %th Catalog
+              %td +$info['database']['catalog']
+        -else
+          No database
+      %td
+        -if($info['http_auth'])
+          %table
+            %tr
+              %th Username
+              %td +$info['http_auth']['username']
+            %tr
+              %th Password
+              %td +$info['http_auth']['password']
+        -else
+          No HTTP Auth (Public)
+      %td
+        =link_to('edit', edit_build_url($pat))
+      %td
+        =link_to('delete', delete_build_url($pat))        

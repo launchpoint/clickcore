@@ -1,10 +1,10 @@
 <?
 
-define('KERNEL_BRANCH_FPATH', normalize_path(dirname(__FILE__)));
-define('KERNEL_FPATH', normalize_path(KERNEL_BRANCH_FPATH."/../.."));
-define('CORE_FPATH', normalize_path(KERNEL_FPATH."/.."));
+
+define('CORE_FPATH', normalize_path(dirname(__FILE__)));
+
 define('ROOT_FPATH', normalize_path(CORE_FPATH.'/..'));
-define('CORE_MODULES_FPATH', CORE_FPATH."/modules");
+define('GLOBAL_MODULES_FPATH', ROOT_FPATH."/modules");
 if(!isset($app_prefix)) $app_prefix = '';
 if ($app_prefix)
 {
@@ -21,11 +21,11 @@ define('ROOT_VPATH', $root_vpath);
 define('APPS_VPATH', ROOT_VPATH."/apps");
 define('APPS_FPATH', ROOT_FPATH."/apps");
 
-$keypath = strtolower("{$__client['folder_name']}/{$__project['folder_name']}/{$__build['folder_name']}");
+$keypath = strtolower($__click['build']['path']);
 define('BUILD_FPATH', strtolower(normalize_path(ROOT_FPATH."/apps/$keypath")));
 define('BUILD_VPATH', strtolower(normalize_path(ROOT_VPATH."/apps/$keypath")));
 
-define('USER_MODULES_FPATH', BUILD_FPATH."/modules");
+define('LOCAL_MODULES_FPATH', BUILD_FPATH."/modules");
 
 define('DATA_FPATH', BUILD_FPATH."/data");
 define('DATA_VPATH', "/".trim(BUILD_VPATH, '/')."/data");
@@ -46,10 +46,12 @@ define('RUN_MODE_DEVELOPMENT', 'development');
 define('RUN_MODE_STAGING', 'staging');
 define('RUN_MODE_TEST', 'test');
 
-ini_set('error_reporting', E_ALL | E_STRICT);
-ini_set('display_errors', 1);
-ini_set('xdebug.var_display_max_data', '100000');
-ini_set('xdebug.var_display_max_depth', '100000');
+if(!isset($validate_request_params)) $__click['validate_request_params'] = true;
+if(!isset($use_ssl)) $__click['use_ssl'] = true;
 
-if(!isset($validate_request_params)) $validate_request_params = true;
-if(!isset($use_ssl)) $use_ssl = true;
+$__click['app_routing_prefix'] = '';
+if (ROOT_VPATH)
+{
+  $__click['app_routing_prefix'] = preg_quote(ROOT_VPATH, '/') . "(?:$|\\/)";
+}
+

@@ -2,7 +2,7 @@
 
 function normalize_path($path)
 {
-  $parts = split('/', $path);
+  $parts = explode('/', $path);
   $new_path = array();
   foreach($parts as $part)
   {

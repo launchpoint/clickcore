@@ -83,14 +83,14 @@ function module_path($name)
 function validate_module_folder_structure($modules)
 {
   $user_folders = array();
-  foreach(glob(USER_MODULES_FPATH."/*") as $fpath)
+  foreach(glob(LOCAL_MODULES_FPATH."/*") as $fpath)
   {
     $module_name = basename($fpath);
     $user_folders[$module_name] = $fpath;
   }
 
   $core_folders = array();
-  foreach(glob(CORE_MODULES_FPATH."/*") as $fpath)
+  foreach(glob(GLOBAL_MODULES_FPATH."/*") as $fpath)
   {
     $module_name = basename($fpath);
     $core_folders[$module_name] = $fpath;
@@ -178,7 +178,7 @@ function load_manifests()
     }
     $manifest['loaded']=false;
     if (!array_key_exists('priority_load', $manifest)) $manifest['priority_load'] = false;
-    $manifest['enabled']=(isset($modules[$module_name])) || startswith($this_module_fpath, USER_MODULES_FPATH);
+    $manifest['enabled']=(isset($modules[$module_name])) || startswith($this_module_fpath, LOCAL_MODULES_FPATH);
     if (!array_key_exists('requires', $manifest)) $manifest['requires'] = array();
     foreach($manifest['routes'] as $event_name=>$handler_struct)
     {

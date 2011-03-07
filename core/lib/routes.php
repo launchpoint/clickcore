@@ -1,10 +1,5 @@
 <?
 
-$app_routing_prefix='';
-if (ROOT_VPATH)
-{
-  $app_routing_prefix = preg_quote(ROOT_VPATH, '/') . "(?:$|\\/)";
-}
 
 function command_url($command_name, $args=array(), $namespace=null)
 {
@@ -91,7 +86,7 @@ $__routes = array();
 
 function map($event_name, $path, $routed_event_name = null, $url_generator_name=null, $is_ssl_required = false)
 {
-  global $code, $app_routing_prefix, $__routes;
+  global $code, $__click, $__routes;
   $parts = split("\\/", $path);
   $keys=array();
   foreach($parts as &$part)
@@ -119,7 +114,7 @@ function map($event_name, $path, $routed_event_name = null, $url_generator_name=
     );
   }
   $pattern = join("\\/",$parts);
-  $pattern = $app_routing_prefix . $pattern;
+  $pattern = $__click['app_routing_prefix'] . $pattern;
   $pattern = "/^$pattern\$/";
   map_raw($event_name, $pattern, $routed_event_name);
   if ($url_generator_name)
@@ -172,7 +167,7 @@ function route_matches()
 
 function route_to_regex($path)
 {
-  global $code, $app_routing_prefix;
+  global $code, $__click;
   $parts = split("\\/", $path);
   $keys=array();
   foreach($parts as &$part)
@@ -190,7 +185,7 @@ function route_to_regex($path)
     }
   }
   $pattern = join("\\/",$parts);
-  $pattern = $app_routing_prefix . $pattern;
+  $pattern = $__click['app_routing_prefix'] . $pattern;
   $pattern = "/^$pattern\$/";
   return $pattern;
 }

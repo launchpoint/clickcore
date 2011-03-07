@@ -1,53 +1,31 @@
 <?
 
-$fname = dirname(__FILE__)."/../../config.php";
-if(file_exists($fname))
-{
-  require($fname);
-}
-
-if(!defined('CLI'))
-{
-  define('CLI',isset($_ENV['SSH_CLIENT']));
-}
-
 $start = microtime(true);
 
-require('load_and_connect.php');
+$fname = dirname(__FILE__)."/../config.php";
+require($fname);
 
-$__build=find_build();
-
-
-date_default_timezone_set('UTC');
-
-$run_mode = strtolower($__build['run_mode']);
-
-if(isset($__projects))
+foreach(glob(dirname(__FILE__)."/lib/*.php") as $lib)
 {
-  $__project = $__projects[$__build['project_id']];
-} else {
-  $recs = query_assoc("select * from projects where id = ?", $__build['project_id']);
-  $__project = $recs[0];
+  require_once($lib);
 }
 
-if(!isset($__client))
-{
-  $recs = query_assoc("select * from users where id = ?", $__project['client_id']);
-  $__client = $recs[0];
-}
+define('CLI',isset($_ENV['SSH_CLIENT']));
 
-$domain = $__build['host'];
+$__click = array();
+add_global('__click');
 
 
-define('APP_DOMAIN', $domain);
+$__click['sites'] = $__sites;
+$__click['build'] = find_build();
 
 if(!CLI)
 {
-  if($__build['http_auth_username'])
+  if($__click['build']['http_auth']['username'])
   {
-    if (!isset($_SERVER['PHP_AUTH_USER']) || $_SERVER['PHP_AUTH_USER']!=$__build['http_auth_username'] || $_SERVER['PHP_AUTH_PW']!=$__build['http_auth_password'])
+    if (!isset($_SERVER['PHP_AUTH_USER']) || $_SERVER['PHP_AUTH_USER']!=$__click['build']['http_auth']['username'] || $_SERVER['PHP_AUTH_PW']!=$__click['build']['http_auth']['password'])
     {
-      header('WWW-Authenticate: Basic realm="$domain Authentication Required"');
+      header('WWW-Authenticate: Basic realm="Authentication Required"');
       header('HTTP/1.0 401 Unauthorized');
       echo 'You are not authorized to view this area.';
       exit;
@@ -55,14 +33,23 @@ if(!CLI)
   }
 }
 
-$modules = array();
-
-require("constants.php");
-
-foreach(glob(dirname(__FILE__)."/lib/*.php") as $lib)
+if($__click['build']['database'])
 {
-  require_once($lib);
+  $__click['dbh'] = db_connect($__click['build']['database']);
+  $__click['root_dbh'] = $__click['dbh'];
+  $__click['queries']=array();
 }
+
+require('constants.php');
+
+date_default_timezone_set('UTC');
+
+$__click['run_mode'] = strtolower($__click['build']['run_mode']);
+
+
+$__click['domain'] = $_SERVER['HTTP_HOST'];
+
+$modules = array();
 
 ensure_writable_folder(TEMP_FPATH);
 ensure_writable_folder(CACHE_FPATH);
@@ -70,14 +57,7 @@ ensure_writable_folder(CODEGEN_CACHE_FPATH);
 ensure_writable_folder(CODEGEN_CLASSES_CACHE_FPATH);
 
 
-$queries=array();
-add_global('queries');
-
-$stash = (object)array();
-add_global('stash');
-
-$__core = array();
-add_global('__core');
+$__click['stash'] = (object)array();
 
 register_shutdown_function('click_save_session');
 
@@ -90,26 +70,19 @@ if(!isset($_SESSION['__core']['sessions'][$_SESSION['__core']['current_session_i
 if(isset($_GET['__session_id'])) $_SESSION['__core']['current_session_id'] = $_GET['__session_id'];
 if(!isset($_SESSION['__core']['sessions'][$_SESSION['__core']['current_session_id']])) $_SESSION['__core']['sessions'][$_SESSION['__core']['current_session_id']] = array();
 $__core['session'] = $_SESSION['__core']['sessions'][$_SESSION['__core']['current_session_id']];
-if(!isset($__core['session']['run_mode'])) $__core['session']['run_mode'] = $run_mode;
+if(!isset($__core['session']['run_mode'])) $__core['session']['run_mode'] = $__click['run_mode'];
 
 if(isset($_GET['__run_mode']))
 {
   $__core['session']['run_mode'] = $_GET['__run_mode'];
 }
 
-$run_mode = $__core['session']['run_mode'];
+$__click['run_mode'] = $__core['session']['run_mode'];
 
 $f = BUILD_FPATH."/modules.php";
 if(file_exists($f)) require($f);
-$f = BUILD_FPATH."/{$run_mode}_modules.php";
+$f = BUILD_FPATH."/{$__click['run_mode']}_modules.php";
 if(file_exists($f)) require($f);
-
-$database_settings = array(
-  'host'=>$__build['db_host'],
-  'username'=>$__build['db_username'],
-  'password'=>$__build['db_password'],
-  'catalog'=>$__build['db_catalog']
-);
 
 foreach( glob(BUILD_FPATH."/config/*.php") as $path)
 {
@@ -117,18 +90,7 @@ foreach( glob(BUILD_FPATH."/config/*.php") as $path)
 }
 
 
-if(CLI)
-{
-  $database_settings['catalog'] .= '_test';
-}
-
-if(!defined('COMPANY_NAME')) define('COMPANY_NAME', $__client['company_name']);
-if(!defined('APP_NAME')) define('APP_NAME', $__project['name']);
-
-$dbh = db_connect($database_settings);
-$app_dbh = $dbh;
-
-if($run_mode == RUN_MODE_TEST)
+if($__click['run_mode'] == RUN_MODE_TEST)
 {
   if(!endswith($database_settings['catalog'], "_test")) click_error("In test mode, but database is not a test database");
   $recs = query_assoc("show tables;");
@@ -141,10 +103,9 @@ if($run_mode == RUN_MODE_TEST)
 }
 
 
-
 if (!file_exists(KERNEL_CACHE_FPATH."/stub.php")) $_GET['__restart'] = true;
 
-if (q('__restart') || in($run_mode,RUN_MODE_DEVELOPMENT,RUN_MODE_TEST))
+if (q('__restart') || in($__click['run_mode'],RUN_MODE_DEVELOPMENT,RUN_MODE_TEST))
 {
   lock('bootstrap');
   if(q('__restart')==2) clear_all_cache();
@@ -154,6 +115,12 @@ if (q('__restart') || in($run_mode,RUN_MODE_DEVELOPMENT,RUN_MODE_TEST))
   $do_codegen=false;
   require(KERNEL_CACHE_FPATH."/stub.php");
 }
+
+dprint($__click,false);
+dprint(round( (microtime(true)-$start) * 1000, 0));
+
+
+
 
 try
 {

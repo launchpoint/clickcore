@@ -1,0 +1,4 @@
+logs/*.log
+vhost.conf
+cache/*
+tmp/*
